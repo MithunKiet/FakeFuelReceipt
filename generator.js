@@ -10,7 +10,6 @@ function addDailyReceipts(startNo = 4930) {
     customerName: "Mithun Kumar"
   };
 
-  // Helper: linear interpolation between start and end rates over N days
   function interpolateRates(startRate, endRate, daysCount) {
     const arr = [];
     const diff = (endRate - startRate) / (daysCount - 1);
@@ -20,7 +19,6 @@ function addDailyReceipts(startNo = 4930) {
     return arr;
   }
 
-  // configuration per month
   const months = [
     { year: 2025, m: 7, startRate: 95.03, endRate: 95.15 },  // July
     { year: 2025, m: 8, startRate: 95.15, endRate: 95.06 },  // August
@@ -29,30 +27,29 @@ function addDailyReceipts(startNo = 4930) {
 
   let receiptNo = startNo;
   months.forEach(({ year, m, startRate, endRate }) => {
-    const daysInMonth = new Date(year, m, 0).getDate();  // e.g. new Date(2025,7,0) => July has 31 days
+    const daysInMonth = new Date(year, m, 0).getDate();
     const rates = interpolateRates(startRate, endRate, daysInMonth);
 
     for (let d = 1; d <= daysInMonth; d++) {
       const rate = rates[d - 1];
-      const amount = 1000 + Math.floor(Math.random() * 3000);  // random between 1000-3999
+      const amount = 1000 + Math.floor(Math.random() * 3000);
       const volume = +(amount / rate).toFixed(2);
-      // random time
       const hh = String(8 + Math.floor(Math.random() * 10)).padStart(2, "0");
       const mm = String(Math.floor(Math.random() * 60)).padStart(2, "0");
-      const mode = ["Cash","Card","UPI"][Math.floor(Math.random() * 3)];
+      const mode = "Cash"; // ✅ Fixed payment mode
 
       receipts.push({
         receiptNo: String(receiptNo++),
         product: vehicle.product,
         ratePerLitre: rate,
-        amount: amount,
-        volume: volume,
+        amount,
+        volume,
         vehicleType: vehicle.vehicleType,
         vehicleNo: vehicle.vehicleNo,
         customerName: vehicle.customerName,
         date: `${String(d).padStart(2, "0")} ${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][m-1]} ${year}`,
         time: `${hh}:${mm}`,
-        mode: mode
+        mode
       });
     }
   });

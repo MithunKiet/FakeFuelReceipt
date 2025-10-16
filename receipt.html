@@ -12,6 +12,38 @@
       padding: 20px;
     }
 
+    h3 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .input-section {
+      text-align: center;
+      margin-bottom: 20px;
+      font-family: monospace;
+    }
+
+    .input-section label {
+      display: inline-block;
+      width: 140px;
+      text-align: right;
+      margin-right: 10px;
+    }
+
+    input, select  {
+      width: 200px;
+      padding: 4px;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+
+    button {
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
     .receipt {
       max-width: 250px;
       background: #efefefcc;
@@ -87,6 +119,31 @@
 </head>
 
 <body>
+  <h3>HPCL Receipts Generator</h3>
+
+  <div class="input-section">
+    <label>VEH TYPE:</label>
+    <select id="vehType" style="
+    width: 213px;
+">
+      <option value="Petrol" selected>Petrol</option>
+      <option value="Diesel">Diesel</option>
+      <option value="CNG">CNG</option>
+      <option value="EV">EV</option>
+    </select><br>
+
+
+    <label>VEH NO:</label>
+    <input type="text" id="vehNo" value="UP13 AT6119"><br>
+
+    <label>CUSTOMER NAME:</label>
+    <input type="text" id="custName" value="Mithun Kumar"><br>
+
+    <button onclick="generateReceipts()">Generate Receipts</button>
+  </div>
+
+  <hr>
+
   <div id="receipts" class="receipts-container"></div>
 
   <script src="generator.js"></script>

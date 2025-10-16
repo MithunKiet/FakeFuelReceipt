@@ -1,84 +1,71 @@
 // Example inline JSON data
-const receiptsData = [
-  {
-    receiptNo: "4924",
+// assume receiptsData already has earlier entries
+const receiptsData = [];
+function addDailyReceipts(startNo = 4930) {
+  const receipts = [];
+  const vehicle = {
     product: "Petrol",
-    ratePerLitre: 94.71,
-    amount: 3450,
-    volume: 36.42,
     vehicleType: "Petrol",
     vehicleNo: "UP13 AT6119",
-    customerName: "Mithun Kumar",
-    date: "03 Apr 2025",
-    time: "14:57",
-    mode: "Cash"
-  },
-  {
-    receiptNo: "4925",
-    product: "Petrol",
-    ratePerLitre: 94.71,
-    amount: 3500,
-    volume: 36.95,
-    vehicleType: "Petrol",
-    vehicleNo: "UP13 AT6119",
-    customerName: "Mithun Kumar",
-    date: "20 Apr 2025",
-    time: "09:20",
-    mode: "Card"
-  },
-  {
-    receiptNo: "4926",
-    product: "Petrol",
-    ratePerLitre: 95.12,
-    amount: 3650,
-    volume: 38.37,
-    vehicleType: "Petrol",
-    vehicleNo: "UP13 AT6119",
-    customerName: "Mithun Kumar",
-    date: "02 May 2025",
-    time: "11:45",
-    mode: "UPI"
-  },
-  {
-    receiptNo: "4927",
-    product: "Petrol",
-    ratePerLitre: 95.05,
-    amount: 3500,
-    volume: 36.82,
-    vehicleType: "Petrol",
-    vehicleNo: "UP13 AT6119",
-    customerName: "Mithun Kumar",
-    date: "15 May 2025",
-    time: "16:10",
-    mode: "Cash"
-  },
-  {
-    receiptNo: "4928",
-    product: "Petrol",
-    ratePerLitre: 94.12,
-    amount: 3400,
-    volume: 36.12,
-    vehicleType: "Petrol",
-    vehicleNo: "UP13 AT6119",
-    customerName: "Mithun Kumar",
-    date: "25 May 2025",
-    time: "08:30",
-    mode: "Card"
-  },
-  {
-    receiptNo: "4929",
-    product: "Petrol",
-    ratePerLitre: 94.85,
-    amount: 3800,
-    volume: 40.06,
-    vehicleType: "Petrol",
-    vehicleNo: "UP13 AT6119",
-    customerName: "Mithun Kumar",
-    date: "05 Jun 2025",
-    time: "13:25",
-    mode: "Cash"
+    customerName: "Mithun Kumar"
+  };
+
+  // Helper: linear interpolation between start and end rates over N days
+  function interpolateRates(startRate, endRate, daysCount) {
+    const arr = [];
+    const diff = (endRate - startRate) / (daysCount - 1);
+    for (let i = 0; i < daysCount; i++) {
+      arr.push(+(startRate + diff * i).toFixed(2));
+    }
+    return arr;
   }
-];
+
+  // configuration per month
+  const months = [
+    { year: 2025, m: 7, startRate: 95.03, endRate: 95.15 },  // July
+    { year: 2025, m: 8, startRate: 95.15, endRate: 95.06 },  // August
+    { year: 2025, m: 9, startRate: 95.08, endRate: 95.19 }   // September
+  ];
+
+  let receiptNo = startNo;
+  months.forEach(({ year, m, startRate, endRate }) => {
+    const daysInMonth = new Date(year, m, 0).getDate();  // e.g. new Date(2025,7,0) => July has 31 days
+    const rates = interpolateRates(startRate, endRate, daysInMonth);
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const rate = rates[d - 1];
+      const amount = 1000 + Math.floor(Math.random() * 3000);  // random between 1000-3999
+      const volume = +(amount / rate).toFixed(2);
+      // random time
+      const hh = String(8 + Math.floor(Math.random() * 10)).padStart(2, "0");
+      const mm = String(Math.floor(Math.random() * 60)).padStart(2, "0");
+      const mode = ["Cash","Card","UPI"][Math.floor(Math.random() * 3)];
+
+      receipts.push({
+        receiptNo: String(receiptNo++),
+        product: vehicle.product,
+        ratePerLitre: rate,
+        amount: amount,
+        volume: volume,
+        vehicleType: vehicle.vehicleType,
+        vehicleNo: vehicle.vehicleNo,
+        customerName: vehicle.customerName,
+        date: `${String(d).padStart(2, "0")} ${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][m-1]} ${year}`,
+        time: `${hh}:${mm}`,
+        mode: mode
+      });
+    }
+  });
+
+  return receipts;
+}
+
+// Then:
+const dailyReceipts = addDailyReceipts(4930);
+  receiptsData.push(...dailyReceipts);
+
+// receiptsData now includes entries from 1 Jul 2025 to 30 Sep 2025
+
 
 function generateReceiptHTML(data) {
   return `

@@ -55,9 +55,9 @@
       }
 
       const months = [
-        { year: 2025, m: 7, startRate: 95.03, endRate: 95.15 },
-        { year: 2025, m: 8, startRate: 95.15, endRate: 95.06 },
-        { year: 2025, m: 9, startRate: 95.08, endRate: 95.19 }
+        { year: 2026, m: 7, startRate: 95.03, endRate: 95.15 },
+        { year: 2026, m: 8, startRate: 95.15, endRate: 95.06 },
+        { year: 2026, m: 9, startRate: 95.08, endRate: 95.19 }
       ];
 
       let receiptNo = 4930;

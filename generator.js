@@ -1,4 +1,10 @@
- function generateReceiptHTML(data) {
+ const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+  function formatDate(d) {
+    return `${String(d.getDate()).padStart(2, "0")} ${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
+  }
+
+  function generateReceiptHTML(data) {
       return `
       <div class="receipt">
         <img class="logo" src="./hplogo.png" alt="Hindustan Petroleum Logo">
@@ -27,6 +33,10 @@
         <div class="section">
           MODE: ${data.mode}
         </div>
+        <div class="section">
+          From Date: ${data.fromDate}<br>
+          To Date: ${data.toDate}
+        </div>
         <div class="footer">
           SAVE FUEL YAANI SAVE MONEY !!<br>
           THANKS FOR FUELLING WITH US.<br>
@@ -41,55 +51,60 @@
       const vehicleType = document.getElementById('vehType').value || "Petrol";
       const vehicleNo = document.getElementById('vehNo').value || "UP13 AT6119";
       const customerName = document.getElementById('custName').value || "Mithun Kumar";
+      const fromDateVal = document.getElementById('fromDate').value;
+      const toDateVal = document.getElementById('toDate').value;
 
-      const receiptsData = [];
-      const receipts = [];
+      if (!fromDateVal || !toDateVal) {
+        alert('Please select both From Date and To Date.');
+        return;
+      }
+
+      // Use local date parsing to avoid timezone offset issues
+      const [fy, fm, fd] = fromDateVal.split('-').map(Number);
+      const [ty, tm, td] = toDateVal.split('-').map(Number);
+      const fromDate = new Date(fy, fm - 1, fd);
+      const toDate = new Date(ty, tm - 1, td);
+
+      if (fromDate > toDate) {
+        alert('From Date should not be greater than To Date.');
+        return;
+      }
+
+      const fromDateDisplay = formatDate(fromDate);
+      const toDateDisplay = formatDate(toDate);
 
       const vehicle = { product: "Petrol", vehicleType, vehicleNo, customerName };
 
-      function interpolateRates(startRate, endRate, daysCount) {
-        const arr = [];
-        const diff = (endRate - startRate) / (daysCount - 1);
-        for (let i = 0; i < daysCount; i++) arr.push(+(startRate + diff * i).toFixed(2));
-        return arr;
-      }
-
-      const months = [
-        { year: 2026, m: 7, startRate: 95.03, endRate: 95.15 },
-        { year: 2026, m: 8, startRate: 95.15, endRate: 95.06 },
-        { year: 2026, m: 9, startRate: 95.08, endRate: 95.19 }
-      ];
-
+      const receiptsData = [];
       let receiptNo = 4930;
-      months.forEach(({ year, m, startRate, endRate }) => {
-        const daysInMonth = new Date(year, m, 0).getDate();
-        const rates = interpolateRates(startRate, endRate, daysInMonth);
 
-        for (let d = 1; d <= daysInMonth; d++) {
-          const rate = rates[d - 1];
-          const amount = 1000 + Math.floor(Math.random() * 3000);
-          const volume = +(amount / rate).toFixed(2);
-          const hh = String(8 + Math.floor(Math.random() * 10)).padStart(2, "0");
-          const mm = String(Math.floor(Math.random() * 60)).padStart(2, "0");
-          const mode = "Cash";
+      const currentDate = new Date(fromDate);
+      while (currentDate <= toDate) {
+        const rate = +(93 + Math.random() * 3).toFixed(2);
+        const amount = 1000 + Math.floor(Math.random() * 3000);
+        const volume = +(amount / rate).toFixed(2);
+        const hh = String(8 + Math.floor(Math.random() * 10)).padStart(2, "0");
+        const mm = String(Math.floor(Math.random() * 60)).padStart(2, "0");
+        const mode = "Cash";
 
-          receipts.push({
-            receiptNo: String(receiptNo++),
-            product: vehicle.product,
-            ratePerLitre: rate,
-            amount,
-            volume,
-            vehicleType: vehicle.vehicleType,
-            vehicleNo: vehicle.vehicleNo,
-            customerName: vehicle.customerName,
-            date: `${String(d).padStart(2, "0")} ${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][m-1]} ${year}`,
-            time: `${hh}:${mm}`,
-            mode
-          });
-        }
-      });
+        receiptsData.push({
+          receiptNo: String(receiptNo++),
+          product: vehicle.product,
+          ratePerLitre: rate,
+          amount,
+          volume,
+          vehicleType: vehicle.vehicleType,
+          vehicleNo: vehicle.vehicleNo,
+          customerName: vehicle.customerName,
+          date: formatDate(currentDate),
+          time: `${hh}:${mm}`,
+          mode,
+          fromDate: fromDateDisplay,
+          toDate: toDateDisplay
+        });
 
-      receiptsData.push(...receipts);
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
 
       const receiptsContainer = document.getElementById('receipts');
       receiptsContainer.innerHTML = ''; // clear old data

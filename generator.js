@@ -38,6 +38,22 @@ function formatISODate(d) {
   return `${y}-${m}-${day}`;
 }
 
+function parseDateInput(value) {
+  const [y, m, d] = value.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function dateRangeInclusive(fromDate, toDate) {
+  const dates = [];
+  const cursor = new Date(fromDate);
+
+  while (cursor <= toDate) {
+    dates.push(new Date(cursor));
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return dates;
+}
 
 function setDefaultDates() {
   const fromDateInput = document.getElementById("fromDate");
@@ -83,7 +99,7 @@ function findRateInApiResponse(payload, product) {
   for (const value of Object.values(payload)) {
     if (typeof value === "object") {
       const nested = findRateInApiResponse(value, product);
-      if (nested) return nested;
+      if (nested != null) return nested;
     }
   }
 
@@ -185,10 +201,8 @@ async function generateReceipts() {
     return;
   }
 
-  const [fy, fm, fd] = fromDateVal.split("-").map(Number);
-  const [ty, tm, td] = toDateVal.split("-").map(Number);
-  const fromDate = new Date(fy, fm - 1, fd);
-  const toDate = new Date(ty, tm - 1, td);
+  const fromDate = parseDateInput(fromDateVal);
+  const toDate = parseDateInput(toDateVal);
 
   if (fromDate > toDate) {
     alert("From Date should not be greater than To Date.");
@@ -197,39 +211,41 @@ async function generateReceipts() {
 
   const fromDateDisplay = formatDate(fromDate);
   const toDateDisplay = formatDate(toDate);
-  const receiptsData = [];
-  let receiptNo = 4930;
-
-  const currentDate = new Date(fromDate);
-  while (currentDate <= toDate) {
+  const dates = dateRangeInclusive(fromDate, toDate);
+  const rates = await Promise.all(dates.map(async (date) => {
     let rate = null;
     let rateSource = "Fallback schedule";
 
     try {
       rate = await fetchFuelRateFromApi({
         product: vehicleType,
-        date: currentDate,
+        date,
         state,
         city
       });
-      if (rate) {
+      if (rate != null) {
         rateSource = "Fuel API";
       }
     } catch (error) {
       console.warn("Fuel API lookup failed, fallback applied:", error.message);
     }
 
-    if (!rate) {
-      rate = getFallbackFuelRate(vehicleType, currentDate);
+    if (rate == null) {
+      rate = getFallbackFuelRate(vehicleType, date);
     }
 
+    return { rate, rateSource };
+  }));
+
+  const receiptsData = dates.map((date, index) => {
+    const { rate, rateSource } = rates[index];
     const volume = +(fuelRangeStart + Math.random() * (fuelRangeEnd - fuelRangeStart)).toFixed(2);
     const amount = +(volume * rate).toFixed(2);
     const hh = String(8 + Math.floor(Math.random() * 10)).padStart(2, "0");
     const mm = String(Math.floor(Math.random() * 60)).padStart(2, "0");
 
-    receiptsData.push({
-      receiptNo: String(receiptNo++),
+    return {
+      receiptNo: String(4930 + index),
       product: vehicleType,
       ratePerLitre: Number(rate.toFixed(2)),
       amount,
@@ -237,22 +253,17 @@ async function generateReceipts() {
       vehicleType,
       vehicleNo,
       customerName,
-      date: formatDate(currentDate),
+      date: formatDate(date),
       time: `${hh}:${mm}`,
       mode: "Cash",
       fromDate: fromDateDisplay,
       toDate: toDateDisplay,
       rateSource
-    });
-
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
+    };
+  });
 
   const receiptsContainer = document.getElementById("receipts");
-  receiptsContainer.innerHTML = "";
-  receiptsData.forEach((receipt) => {
-    receiptsContainer.innerHTML += generateReceiptHTML(receipt);
-  });
+  receiptsContainer.innerHTML = receiptsData.map(generateReceiptHTML).join("");
 }
 
 

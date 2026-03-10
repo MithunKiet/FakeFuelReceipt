@@ -38,6 +38,24 @@ function formatISODate(d) {
   return `${y}-${m}-${day}`;
 }
 
+
+function setDefaultDates() {
+  const fromDateInput = document.getElementById("fromDate");
+  const toDateInput = document.getElementById("toDate");
+  if (!fromDateInput || !toDateInput) return;
+
+  if (!toDateInput.value) {
+    const today = new Date();
+    toDateInput.value = formatISODate(today);
+  }
+
+  if (!fromDateInput.value) {
+    const from = new Date(toDateInput.value || new Date());
+    from.setDate(from.getDate() - 6);
+    fromDateInput.value = formatISODate(from);
+  }
+}
+
 function getFallbackFuelRate(product, date) {
   const schedule = FALLBACK_FUEL_RATE_SCHEDULE[product] || FALLBACK_FUEL_RATE_SCHEDULE.Petrol;
   const target = date.getTime();
@@ -147,8 +165,8 @@ async function generateReceipts() {
   const customerName = document.getElementById("custName").value || "Mithun Kumar";
   const fromDateVal = document.getElementById("fromDate").value;
   const toDateVal = document.getElementById("toDate").value;
-  const fuelRangeStart = Number(document.getElementById("fuelRangeStart").value);
-  const fuelRangeEnd = Number(document.getElementById("fuelRangeEnd").value);
+  const fuelRangeStart = parseFloat(document.getElementById("fuelRangeStart").value);
+  const fuelRangeEnd = parseFloat(document.getElementById("fuelRangeEnd").value);
   const city = document.getElementById("city").value.trim() || "Ghaziabad";
   const state = document.getElementById("state").value.trim() || "Uttar Pradesh";
 
@@ -157,7 +175,7 @@ async function generateReceipts() {
     return;
   }
 
-  if (!fuelRangeStart || !fuelRangeEnd || fuelRangeStart <= 0 || fuelRangeEnd <= 0) {
+  if (!Number.isFinite(fuelRangeStart) || !Number.isFinite(fuelRangeEnd) || fuelRangeStart <= 0 || fuelRangeEnd <= 0) {
     alert("Please enter valid fuel range values.");
     return;
   }
@@ -236,3 +254,6 @@ async function generateReceipts() {
     receiptsContainer.innerHTML += generateReceiptHTML(receipt);
   });
 }
+
+
+setDefaultDates();

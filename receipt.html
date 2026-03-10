@@ -18,30 +18,56 @@
     }
 
     .input-section {
-      text-align: center;
-      margin-bottom: 20px;
+      margin: 0 auto 20px;
+      max-width: 1100px;
       font-family: monospace;
     }
 
-    .input-section label {
-      display: inline-block;
-      width: 140px;
-      text-align: right;
-      margin-right: 10px;
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(220px, 1fr));
+      gap: 10px 16px;
+      align-items: end;
+      margin-bottom: 12px;
     }
 
-    input, select  {
-      width: 200px;
-      padding: 4px;
-      margin-bottom: 8px;
+    .field {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    .field label {
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    input,
+    select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 6px;
       font-size: 12px;
+    }
+
+    .range-inputs {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .range-inputs input {
+      width: calc(50% - 10px);
     }
 
     button {
+      display: block;
+      margin: 0 auto;
       padding: 6px 12px;
       font-size: 12px;
       cursor: pointer;
-      margin-top: 8px;
     }
 
     .receipt {
@@ -94,6 +120,18 @@
       break-inside: avoid;
     }
 
+    @media (max-width: 1000px) {
+      .form-grid {
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+      }
+    }
+
+    @media (max-width: 560px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     @media print {
       body {
         background: none;
@@ -122,28 +160,56 @@
   <h3>HPCL Receipts Generator</h3>
 
   <div class="input-section">
-    <label>VEH TYPE:</label>
-    <select id="vehType" style="
-    width: 213px;
-">
-      <option value="Petrol" selected>Petrol</option>
-      <option value="Diesel">Diesel</option>
-      <option value="CNG">CNG</option>
-      <option value="EV">EV</option>
-    </select><br>
+    <div class="form-grid">
+      <div class="field">
+        <label for="vehType">VEH TYPE:</label>
+        <select id="vehType">
+          <option value="Petrol" selected>Petrol</option>
+          <option value="Diesel">Diesel</option>
+          <option value="CNG">CNG</option>
+          <option value="EV">EV</option>
+        </select>
+      </div>
 
+      <div class="field">
+        <label for="vehNo">VEH NO:</label>
+        <input type="text" id="vehNo" value="UP13 AT6119">
+      </div>
 
-    <label>VEH NO:</label>
-    <input type="text" id="vehNo" value="UP13 AT6119"><br>
+      <div class="field">
+        <label for="custName">CUSTOMER NAME:</label>
+        <input type="text" id="custName" value="Mithun Kumar">
+      </div>
 
-    <label>CUSTOMER NAME:</label>
-    <input type="text" id="custName" value="Mithun Kumar"><br>
+      <div class="field">
+        <label for="fromDate">FROM DATE:</label>
+        <input type="date" id="fromDate">
+      </div>
 
-    <label>FROM DATE:</label>
-    <input type="date" id="fromDate"><br>
+      <div class="field">
+        <label for="toDate">TO DATE:</label>
+        <input type="date" id="toDate">
+      </div>
 
-    <label>TO DATE:</label>
-    <input type="date" id="toDate"><br>
+      <div class="field">
+        <label for="fuelRangeStart">FUEL RANGE (LTR):</label>
+        <div class="range-inputs">
+          <input type="number" id="fuelRangeStart" min="1" step="0.1" value="8">
+          <span>-</span>
+          <input type="number" id="fuelRangeEnd" min="1" step="0.1" value="20">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="city">CITY:</label>
+        <input type="text" id="city" value="Ghaziabad">
+      </div>
+
+      <div class="field">
+        <label for="state">STATE:</label>
+        <input type="text" id="state" value="Uttar Pradesh">
+      </div>
+    </div>
 
     <label>FUEL RANGE (LTR):</label>
     <input type="number" id="fuelRangeStart" min="1" step="0.1" value="8" style="width: 95px;"> -

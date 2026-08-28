@@ -34,5 +34,7 @@ A single-page, client-side tool that generates printable HPCL-style fuel purchas
 
 ## Notes
 
-- The fuel rate API endpoint in `generator.js` is a placeholder (`FUEL_RATE_API`) and requires a valid RapidAPI key/host to return live data; without one, generation falls back to the static rate schedule.
+- The fuel rate API endpoint in `generator.js` is a placeholder (`FUEL_RATE_API`) and requires a valid RapidAPI key. Set `FUEL_RATE_API.key` to enable live lookups; while it is empty the API is skipped entirely (no failing requests) and every receipt uses the static rate schedule.
+- Receipt numbers are derived from the receipt date, so the same date always yields the same number and different date ranges never collide.
+- A single generation is capped at `MAX_RECEIPT_DAYS` (366) days.
 - This tool is intended for generating sample/mock receipts (e.g. for testing or demo purposes) and is not affiliated with HPCL.
